@@ -95,6 +95,8 @@
   </div>
 </div>
 </body>
+<link href="__PUBLIC__/static/layui/css/layui.css" rel="stylesheet" type="text/css">
+<script src="__PUBLIC__/static/layui/layui.js"></script>
 <script type="text/javascript"> 
 	// 没有点击收货确定的按钮让他自己收货确定    
 	var timestamp = Date.parse(new Date());
@@ -134,6 +136,43 @@
 			$("#admin-manager-btn").attr("title","显示快捷管理");
 			$("#admin-manager-btn").removeClass().addClass("arrow");
         }           
+    });
+    layui.use('layim', function (layim) {
+
+        layim.config({
+            brief: false, //是否简约模式（如果true则不显示主面板）
+            title: '客服系统',
+            chatLog: layui.cache.dir + 'css/modules/layim/html/chatlog.html',
+            init: {
+                url: '{:url("layim/init")}' //接口地址（返回的数据格式见下文）
+                , type: 'get' //默认get，一般可不填
+                , data: {} //额外参数
+            },
+        });
+
+        var ws = new WebSocket('ws://39.100.72.24:8282');
+        // 服务端主动推送消息时会触发这里的onmessage
+        ws.onmessage = function (e) {
+            // json数据转换成js对象
+            var data = eval("(" + e.data + ")");
+            var type = data.type || '';
+            switch (type) {
+                // Events.php中返回的init类型的消息，将client_id发给后台进行uid绑定
+                case 'init':
+                    // 利用jquery发起ajax请求，将client_id发给后端进行uid绑定
+                    $.post('{:url("layim/bind")}', {client_id: data.client_id, user_id: '-1'}, function (data) {
+                    }, 'json');
+                    break;
+                // 当mvc框架调用GatewayClient发消息时直接alert出来
+                case 'msg':
+                    layim.getMessage(data.content);
+            }
+        };
+        layim.on('sendMessage', function(res){
+            $.post('{:url("layim/sendMessage")}', {user_id: res.to.id,message:res.mine.content}, function (data) {
+            }, 'json');
+        })
+
     });
 </script>
 </html>
