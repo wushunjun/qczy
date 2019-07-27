@@ -1,0 +1,157 @@
+<include file="public/layout" />
+<!--<script type="text/javascript" src="//api.map.baidu.com/api?ak=iR2qhnXd5vrFI9wUuIRG9AWGIqykVNok&v=2.0"></script>-->
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4"></script>
+<link href="__PUBLIC__/static/css/timePicker.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery-timepicker.js"></script>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.config.js"/>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.all.min.js"/>
+<script type="text/javascript" charset="utf-8" src="__ROOT__/public/plugins/Ueditor/lang/zh-cn/zh-cn.js"></script>
+<style>
+    .select-business-map {
+        width: 485px;
+        height: 270px;
+    }
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>素材评论管理 - 添加/编辑素材评论</h3>
+                <h5>网站系统素材评论管理</h5>
+            </div>
+        </div>
+    </div>
+    <form class="form-horizontal" id="handleForm">
+        <input name="luck_id" type="hidden" value="{$luck_id}" />
+        <div class="ncap-form-default">
+            <span id="dl_box">
+                <dl class="row">
+                    <dt class="tit">
+                        <label><em>*</em>评论</label>
+                    </dt>
+                    <dd class="opt">
+                        <input type="text" name="lc_nickname[]" value="" placeholder="昵称" class="input-txt"><input placeholder="内容" type="text" name="lc_content[]" value="" class="input-txt">
+                        <a href="JavaScript:void(0);" class="ncap-btn-big ncap-btn-green add_btn">添加</a>
+                    </dd>
+                </dl>
+            </span>
+            <div class="bot"><a class="ncap-btn-big ncap-btn-green" id="submit">确认提交</a></div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    //单图上传
+    function img_call_back(fileurl_tmp , elementid)
+    {
+        $("#"+elementid).val(fileurl_tmp);
+        $("#"+elementid+'_a').attr('href', fileurl_tmp);
+        $("#"+elementid+'_i').attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+    }
+    $(function () {
+        $(document).on("click", '#submit', function (e) {
+            $('#submit').attr('disabled',true);
+            verifyForm();
+        })
+    });
+    function verifyForm(){
+        $('span.err').hide();
+        var is_err = false;
+        $("input[type=text]").each(function(idx,item){
+            if($(item).val() == ''){
+                is_err = true;
+            }
+        })
+        if(is_err){
+            layer.msg('请填将数据写完整',{icon:2});
+            return false;
+        }
+        var data = $('#handleForm').serialize();
+        var lc_id = $("input[name='lc_id']").val();
+        if(!lc_id){
+            data += '&act=add';
+        }else{
+            data += '&act=edit';
+        }
+        $.ajax({
+            type: "POST",
+            url: "{:url('commentPost')}",
+            data: data,
+            async:false,
+            dataType: "json",
+            error: function () {
+                layer.alert("服务器繁忙, 请联系管理员!");
+            },
+            success: function (data) {
+                if (data.status == 1) {
+                    layer.msg(data.msg,{icon: 1,time: 2000},function(){
+                        location.href = "{:U('luck/commentList',array('luck_id'=>$luck_id))}";
+                    });
+                } else {
+                    $('#submit').attr('disabled',false);
+                    $.each(data.result, function (index, item) {
+                        var id = index.replace('[]','');
+                        $('#err-'+id).text(item).show();
+                    });
+                    layer.msg(data.msg, {icon: 2,time: 3000});
+                }
+            }
+        });
+    }
+    /**
+     * 删除组图input
+     * @access   public
+     */
+    function image_del(obj)
+    {
+        $(obj).parent().remove();
+    }
+    $(document).ready(function(e) {
+        var lc_id = $("input[name='lc_id']").val();
+        if (lc_id > 0) {
+            $("input[name='lcper_name']").attr('disabled', 'disabled');
+        }
+        $('.z-week').find('.z-week-list').each(function(i,o){
+            var day = $(this).find('input').val();
+            if(day == 1){
+                $(this).addClass('week-list-bg');
+            }else{
+                $(this).removeClass('week-list-bg');
+            }
+        })
+        $(".time-picker").hunterTimePicker();
+        $(".z-week-list").click(function  () {
+            if($(this).hasClass('week-list-bg')){
+                $(this).find("input").val(0);
+                $(this).removeClass('week-list-bg')
+            }else{
+                $(this).find("input").val(1);
+                $(this).addClass('week-list-bg')
+            }
+        })
+    });
+    $(document).on('click','.del_btn',function(){
+        $(this).parents('dl').remove();
+        var num = $('dl').length;
+        if(num < 4){
+            $('.add_btn').show();
+        }
+    })
+    $('.add_btn').click(function(){
+        var html_str = `<dl class="row">
+                <dt class="tit">
+                <label><em>*</em>评论</label>
+                </dt>
+                <dd class="opt">
+                <input type="text" name="lc_nickname[]" value="" placeholder="昵称" class="input-txt"><input placeholder="内容" type="text" name="lc_content[]" value="" class="input-txt">
+                <a href="JavaScript:void(0);" class="ncap-btn-big ncap-btn-red del_btn">删除</a>
+                </dd>
+                </dl>`;
+        $("#dl_box").append(html_str);
+    })
+</script>
+</body>
+</html>

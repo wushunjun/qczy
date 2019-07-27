@@ -1,0 +1,222 @@
+<include file="public/layout" />
+<script src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<!--<script type="text/javascript" src="//api.map.baidu.com/api?ak=iR2qhnXd5vrFI9wUuIRG9AWGIqykVNok&v=2.0"></script>-->
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4"></script>
+<link href="__PUBLIC__/static/css/timePicker.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery-timepicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/jquery-select/js/hdw.js"></script>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.config.js"/>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.all.min.js"/>
+<script type="text/javascript" charset="utf-8" src="__ROOT__/public/plugins/Ueditor/lang/zh-cn/zh-cn.js"></script>
+<style>
+	.select-business-map {
+		width: 485px;
+		height: 270px;
+	}
+	.hdw-select { width:200px; height:167px; padding:5px;}
+	.hdw-content { float:left; text-align:center; margin-right:10px;}
+	.hdw-span { display:block; width:100px; background:#eee; cursor:pointer; border:1px solid #ccc; padding:5px 0; margin:5px 0;}
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+			<div class="subject">
+				<h3>打卡任务管理 - 添加/编辑打卡任务</h3>
+				<h5>网站系统打卡任务管理</h5>
+			</div>
+		</div>
+	</div>
+	<form class="form-horizontal" id="handleForm">
+		<input name="task_id" type="hidden" value="{$info['task_id']}" />
+		<input name="user_id" type="hidden" value="{$user_id}" />
+		<div class="ncap-form-default">
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>任务名称</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="task_name" value="{$info.task_name}" class="input-txt">
+					<span class="err" id="err-task_name"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>任务描述</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="task_desc" value="{$info.task_desc}" class="input-txt">
+					<span class="err" id="err-task_desc"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>任务开始时间</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" id="task_start_time" name="task_start_time" value="{$info.task_start_time}" readonly class="input-txt">
+					<span class="err" id="err-task_start_time"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>打卡天数</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="task_days" value="{$info.task_days}" class="input-txt">
+					<span class="err" id="err-task_days"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="task_icon"><em>*</em>小图标</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+                        <span class="show">
+                            <a id="task_icon_a" class="nyroModal" rel="gal" href="{$info.task_icon}">
+								<i id="task_icon_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$info.task_icon}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+							</a>
+                        </span>
+           	            <span class="type-file-box">
+                            <input type="text" id="task_icon" name="task_icon" value="{$info.task_icon}" class="type-file-text">
+                            <input type="button" name="button" value="选择上传..." class="type-file-button">
+                            <input class="type-file-file" onClick="GetUploadify(1,'task_icon','task','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+                        </span>
+					</div>
+					<span class="err" id="err-tr_icon"></span>
+				</dd>
+
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="task_img"><em>*</em>列表图</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+                        <span class="show">
+                            <a id="task_img_a" class="nyroModal" rel="gal" href="{$info.task_img}">
+								<i id="task_img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$info.task_img}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+							</a>
+                        </span>
+           	            <span class="type-file-box">
+                            <input type="text" id="task_img" name="task_img" value="{$info.task_img}" class="type-file-text">
+                            <input type="button" name="button" value="选择上传..." class="type-file-button">
+                            <input class="type-file-file" onClick="GetUploadify(1,'task_img','task','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+                        </span>
+					</div>
+					<span class="err" id="err-task_img"></span>
+				</dd>
+
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="task_img"><em>*</em>背景图</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+                        <span class="show">
+                            <a id="task_bg_img_a" class="nyroModal" rel="gal" href="{$info.task_bg_img}">
+								<i id="task_bg_img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$info.task_bg_img}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+							</a>
+                        </span>
+           	            <span class="type-file-box">
+                            <input type="text" id="task_bg_img" name="task_bg_img" value="{$info.task_bg_img}" class="type-file-text">
+                            <input type="button" name="button" value="选择上传..." class="type-file-button">
+                            <input class="type-file-file" onClick="GetUploadify(1,'task_bg_img','task','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+                        </span>
+					</div>
+					<span class="err" id="err-task_bg_img"></span>
+				</dd>
+
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>选择打卡项目</label>
+				</dt>
+				<dd class="opt">
+					<div class="hdw-content">
+
+						<select class="hdw-select" multiple="multiple" id="select1">
+
+							<foreach name="task_resource" id="val">
+								<option value="{$val.tr_id}">{$val.tr_name}</option>
+							</foreach>
+
+						</select>
+
+						<span class="hdw-span" id="add">选中右移>></span> <span class="hdw-span" id="add_all">全部右移>></span>
+					</div>
+
+					<div class="hdw-content">
+
+						<select class="hdw-select" name="tr_id[]" multiple="multiple" id="select2">
+
+						</select>
+
+						<span class="hdw-span" id="remove">选中左移>></span><span class="hdw-span" id="remove_all">全部左移>></span>
+
+					</div>
+				</dd>
+			</dl>
+			<div class="bot"><a class="ncap-btn-big ncap-btn-green" id="submit">确认提交</a></div>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#task_start_time').layDate();
+	})
+	//单图上传
+	function img_call_back(fileurl_tmp , elementid)
+	{
+		$("#"+elementid).val(fileurl_tmp);
+		$("#"+elementid+'_a').attr('href', fileurl_tmp);
+		$("#"+elementid+'_i').attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+	}
+	$(function () {
+		$(document).on("click", '#submit', function (e) {
+			$('#submit').attr('disabled',true);
+			verifyForm();
+		})
+	});
+	function verifyForm(){
+		$('span.err').hide();
+		var data = $('#handleForm').serialize();
+		var task_id = $("input[name='task_id']").val();
+		if(!task_id){
+			data += '&act=add';
+		}else{
+			data += '&act=edit';
+		}
+		$.ajax({
+			type: "POST",
+			url: "{:url('postHandle')}",
+			data: data,
+			async:false,
+			dataType: "json",
+			error: function () {
+				layer.alert("服务器繁忙, 请联系管理员!");
+			},
+			success: function (data) {
+				if (data.status == 1) {
+					layer.msg(data.msg,{icon: 1,time: 2000},function(){
+						location.href = "{:U('index',array('user_id'=>$user_id))}";
+					});
+				} else {
+					$('#submit').attr('disabled',false);
+					$.each(data.result, function (index, item) {
+						var id = index.replace('[]','');
+						$('#err-'+id).text(item).show();
+					});
+					layer.msg(data.msg, {icon: 2,time: 3000});
+				}
+			}
+		});
+	}
+</script>
+</body>
+</html>

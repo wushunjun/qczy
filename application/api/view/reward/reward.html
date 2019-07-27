@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <script src="/public/js/jquery-1.8.2.min.js"  type="text/javascript" ></script>
+</head>
+<body>
+</body>
+<script type="text/javascript">
+    //调用微信JS api 支付
+    function jsApiCall()
+    {
+        WeixinJSBridge.invoke(
+                'getBrandWCPayRequest',
+        <?php echo $jsApiParameters; ?>,
+        function(res){
+            WeixinJSBridge.log(res.err_msg);
+            if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                window.location.href = "{:url('pay_success',array('out_trade_no'=>$out_trade_no))}";
+            }     // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+            else if(res.err_msg == "get_brand_wcpay_request:cancel"){
+                alert('交易取消');
+                window.location.href = "javascript:history.go(-1);";
+            }else{
+                alert(res.err_code+res.err_desc+res.err_msg);
+            }
+        }
+    );
+    }
+
+    function callpay()
+    {
+        if (typeof WeixinJSBridge == "undefined"){
+            if( document.addEventListener ){
+                document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+            }else if (document.attachEvent){
+                document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+                document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+            }
+        }else{
+            jsApiCall();
+        }
+    }
+    $(function(){
+        callpay()
+    })
+</script>
+</html>

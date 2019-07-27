@@ -1,0 +1,164 @@
+<include file="public/layout" />
+<script src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<body style="background-color: rgb(255, 255, 255); overflow: auto; cursor: default; -moz-user-select: inherit;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title">
+			<div class="subject">
+				<h3>打卡资源管理</h3>
+				<h5>打卡资源索引与管理</h5>
+			</div>
+		</div>
+	</div>
+	<!-- 操作说明 -->
+	<div id="explanation" class="explanation" style="color: rgb(44, 188, 163); background-color: rgb(237, 251, 248); width: 99%; height: 100%;">
+		<div id="checkZoom" class="title"><i class="fa fa-lightbulb-o"></i>
+			<h4 title="提示相关设置操作时应注意的要点">操作提示</h4>
+			<span title="收起提示" id="explanationZoom" style="display: block;"></span>
+		</div>
+		<ul>
+            <li>>打卡资源操作, 在此管理.</li>
+        </ul>
+	</div>
+	<div class="flexigrid">
+		<div class="mDiv">
+			<div class="ftitle">
+				<h3>打卡资源列表</h3>
+				<h5>(共{$page->totalRows}条记录)</h5>
+			</div>
+			<div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
+			<form class="navbar-form form-inline" action="{:U('Admin/TaskResource/index')}" method="get">
+				<div class="sDiv">
+					<div class="sDiv2">
+						<input size="30" name="keywords" value="{$Request.param.keywords}" placeholder="打卡资源名称" class="qsbox" type="text">
+						<input type="submit" class="btn" value="搜索">
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="hDiv">
+			<div class="hDivBox">
+				<table cellspacing="0" cellpadding="0">
+					<thead>
+					<tr>
+						<th class="sign" axis="col0">
+							<div style="width: 24px;"><i class="ico-check"></i></div>
+						</th>
+						<th align="center" abbr="article_title" axis="col3" class="">
+							<div style="text-align: center; width: 50px;" class="">ID</div>
+						</th>
+						<th align="center" abbr="ac_id" axis="col4" class="">
+							<div style="text-align: left; width: 100px;" class="">打卡名称</div>
+						</th>
+						<th align="center" abbr="article_show" axis="col5" class="">
+							<div style="text-align: center; width: 100px;" class="">图片</div>
+						</th>
+						<th align="center" abbr="article_show" axis="col5" class="">
+							<div style="text-align: center; width: 100px;" class="">动图</div>
+						</th>
+						<th align="center" axis="col1" class="handle">
+							<div style="text-align: center; width: 150px;">操作</div>
+						</th>
+						<th style="width:100%" axis="col7">
+							<div></div>
+						</th>
+					</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+		<div class="tDiv">
+			<div class="tDiv2">
+				<div class="fbutton"> <a href="{:U('Admin/TaskResource/info')}">
+					<div class="add" title="添加打卡资源">
+						<span><i class="fa fa-plus"></i>添加打卡资源</span>
+					</div>
+				</a> </div>
+			</div>
+			<div style="clear:both"></div>
+		</div>
+		<div class="bDiv" style="height: auto;">
+			<div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
+				<table>
+					<tbody>
+					<volist name="list" id="val">
+						<tr>
+							<td class="sign" axis="col0">
+								<div style="width: 24px;"><i class="ico-check"></i></div>
+							</td>
+							<td align="center" abbr="article_title" axis="col3" class="">
+								<div style="text-align: center; width: 50px;" class="">{$val.tr_id}</div>
+							</td>
+							<td align="center" abbr="ac_id" axis="col4" class="">
+								<div style="text-align: left; width: 100px;" class="">{$val.tr_name}</div>
+							</td>
+							<td align="center" abbr="article_time" axis="col6" class="">
+								<div style="text-align: center; width: 100px;height: 42px;padding: 0 8px;" class="">
+									<img src="{$val.tr_img}" width="42"/>
+								</div>
+							</td>
+							<td align="center" abbr="article_time" axis="col6" class="">
+								<div style="text-align: center; width: 100px;height: 42px;padding: 0 8px;" class="">
+									<img src="{$val.tr_gif}" width="42"/>
+								</div>
+							</td>
+							<td align="left" class="handle">
+								<div style="text-align: left; width: 150px;">
+									<a class="btn blue" href="{:U('TaskResource/info',array('tr_id'=>$val['tr_id']))}"><i class="fa fa-pencil-square-o"></i>编辑</a>
+									<a class="btn red" data-url="{:U('TaskResource/postHandle')}" data-id="{$val.tr_id}" onclick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
+								</div>
+							</td>
+							<td align="" class="" style="width: 100%;">
+								<div>&nbsp;</div>
+							</td>
+						</tr>
+					</volist>
+					</tbody>
+				</table>
+			</div>
+			<div class="iDiv" style="display: none;"></div>
+		</div>
+		<!--分页位置-->
+		{$page} </div>
+</div>
+<script>
+	$(document).ready(function(){
+		// 表格行点击选中切换
+		$('#flexigrid > table>tbody >tr').click(function(){
+			$(this).toggleClass('trSelected');
+		});
+
+		// 点击刷新数据
+		$('.fa-refresh').click(function(){
+			location.href = location.href;
+		});
+	});
+	function delfun(obj) {
+		layer.confirm('确认删除？', {
+					btn: ['确定', '取消'] //按钮
+				}, function () {
+					$.ajax({
+						type: 'post',
+						url: $(obj).attr('data-url'),
+						data: {del_id: $(obj).attr('data-id'),act:'del'},
+						dataType: 'json',
+						success: function (data) {
+							layer.closeAll();
+							if (data.status == 1) {
+								layer.msg(data.msg, {icon: 1});
+								$(obj).parent().parent().parent().remove();
+							} else {
+								layer.msg(data.msg, {icon: 2, time: 2000});
+							}
+						}
+					})
+				}, function (index) {
+					layer.close(index);
+				}
+		);
+	}
+</script>
+</body>
+</html>

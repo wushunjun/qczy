@@ -1,0 +1,181 @@
+<include file="public/layout" />
+<!--<script type="text/javascript" src="//api.map.baidu.com/api?ak=iR2qhnXd5vrFI9wUuIRG9AWGIqykVNok&v=2.0"></script>-->
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4"></script>
+<link href="__PUBLIC__/static/css/timePicker.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery-timepicker.js"></script>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.config.js"/>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.all.min.js"/>
+<script type="text/javascript" charset="utf-8" src="__ROOT__/public/plugins/Ueditor/lang/zh-cn/zh-cn.js"></script>
+<style>
+	.select-business-map {
+		width: 485px;
+		height: 270px;
+	}
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+			<div class="subject">
+				<h3>礼物管理 - 添加/编辑礼物</h3>
+				<h5>网站系统礼物管理</h5>
+			</div>
+		</div>
+	</div>
+	<form class="form-horizontal" id="handleForm">
+		<input name="gift_id" type="hidden" value="{$info['gift_id']}" />
+		<div class="ncap-form-default">
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>礼物名称</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="gift_name" value="{$info.gift_name}" class="input-txt">
+					<span class="err" id="err-gift_name"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>礼物类型</label>
+				</dt>
+				<dd class="opt">
+					<select name="gift_type" id="gift">
+						<option <if condition="$info['gift_type'] eq 0">selected</if>  value="0">打赏礼物</option>
+						<option <if condition="$info['gift_type'] eq 1">selected</if>  value="1">抽奖礼物</option>
+					</select>
+					<span class="err" id="err-gift_type"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>礼物价格</label>
+				</dt>
+				<dd class="opt">
+					<input type="text"  name="gift_price" value="{$info.gift_price}" class="input-txt">
+					<span class="err" id="err-gift_price"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="gift_img"><em>*</em>图片</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+                        <span class="show">
+                            <a id="gift_img_a" class="nyroModal" rel="gal" href="{$info.gift_img}">
+								<i id="gift_img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$info.gift_img}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+							</a>
+                        </span>
+           	            <span class="type-file-box">
+                            <input type="text" id="gift_img" name="gift_img" value="{$info.gift_img}" class="type-file-text">
+                            <input type="button" name="button" value="选择上传..." class="type-file-button">
+                            <input class="type-file-file" onClick="GetUploadify(1,'gift_img','gift','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+                        </span>
+					</div>
+					<span class="err" id="err-gift_img"></span>
+				</dd>
+
+			</dl>
+			<div class="bot"><a class="ncap-btn-big ncap-btn-green" id="submit">确认提交</a></div>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	//单图上传
+	function img_call_back(fileurl_tmp , elementid)
+	{
+		$("#"+elementid).val(fileurl_tmp);
+		$("#"+elementid+'_a').attr('href', fileurl_tmp);
+		$("#"+elementid+'_i').attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+	}
+	$(function () {
+		$(document).on("click", '#submit', function (e) {
+			$('#submit').attr('disabled',true);
+			verifyForm();
+		})
+	});
+	function verifyForm(){
+		$('span.err').hide();
+		var data = $('#handleForm').serialize();
+		var gift_id = $("input[name='gift_id']").val();
+		if(!gift_id){
+			data += '&act=add';
+		}else{
+			data += '&act=edit';
+		}
+		$.ajax({
+			type: "POST",
+			url: "{:url('postHandle')}",
+			data: data,
+			async:false,
+			dataType: "json",
+			error: function () {
+				layer.alert("服务器繁忙, 请联系管理员!");
+			},
+			success: function (data) {
+				if (data.status == 1) {
+					layer.msg(data.msg,{icon: 1,time: 2000},function(){
+						location.href = "{:U('gift/index')}";
+					});
+				} else {
+					$('#submit').attr('disabled',false);
+					$.each(data.result, function (index, item) {
+						var id = index.replace('[]','');
+						$('#err-'+id).text(item).show();
+					});
+					layer.msg(data.msg, {icon: 2,time: 3000});
+				}
+			}
+		});
+	}
+	// 上传商品相册回调函数
+	function gift_image_call_back(paths) {
+		var last_div = $(".goods_xc:last").prop("outerHTML");
+		for (var i = 0; i < paths.length; i++) {
+			$(".goods_xc:eq(0)").before(last_div);	// 插入一个 新图片
+			$(".goods_xc:eq(0)").find('a:eq(0)').attr('href', paths[i]).attr('onclick', '').attr('target', "_blank");// 修改他的链接地址
+			$(".goods_xc:eq(0)").find('img').attr('src', paths[i]);// 修改他的图片路径
+			$(".goods_xc:eq(0)").find('a:eq(1)').attr('onclick', "image_del(this,'" + paths[i] + "')").text('删除');
+			var input_obj = $("<input type='hidden' name='gift_album[]' value='"+paths[i]+"'/>");
+			$(".goods_xc:eq(0)").find('a:eq(0)').before(input_obj);
+//			$(".goods_xc:eq(0)").find('input').val(paths[i]); // 设置隐藏域 要提交的值
+		}
+	}
+	/**
+	 * 删除组图input
+	 * @access   public
+	 */
+	function image_del(obj)
+	{
+		$(obj).parent().remove();
+	}
+	$(document).ready(function(e) {
+		var gift_id = $("input[name='gift_id']").val();
+		if (gift_id > 0) {
+			$("input[name='giftper_name']").attr('disabled', 'disabled');
+		}
+		$('.z-week').find('.z-week-list').each(function(i,o){
+			var day = $(this).find('input').val();
+			if(day == 1){
+				$(this).addClass('week-list-bg');
+			}else{
+				$(this).removeClass('week-list-bg');
+			}
+		})
+		$(".time-picker").hunterTimePicker();
+		$(".z-week-list").click(function  () {
+			if($(this).hasClass('week-list-bg')){
+				$(this).find("input").val(0);
+				$(this).removeClass('week-list-bg')
+			}else{
+				$(this).find("input").val(1);
+				$(this).addClass('week-list-bg')
+			}
+		})
+	});
+</script>
+</body>
+</html>

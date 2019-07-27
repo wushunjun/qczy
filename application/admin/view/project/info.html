@@ -1,0 +1,281 @@
+<include file="public/layout" />
+<!--<script type="text/javascript" src="//api.map.baidu.com/api?ak=iR2qhnXd5vrFI9wUuIRG9AWGIqykVNok&v=2.0"></script>-->
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4"></script>
+<link href="__PUBLIC__/static/css/timePicker.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery-timepicker.js"></script>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.config.js"/>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.all.min.js"/>
+<script type="text/javascript" charset="utf-8" src="__ROOT__/public/plugins/Ueditor/lang/zh-cn/zh-cn.js"></script>
+<style>
+	.select-business-map {
+		width: 485px;
+		height: 270px;
+	}
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+			<div class="subject">
+				<h3>项目管理 - 添加/编辑项目</h3>
+				<h5>网站系统项目管理</h5>
+			</div>
+		</div>
+	</div>
+	<form class="form-horizontal" id="handleForm">
+		<input name="project_id" type="hidden" value="{$info['project_id']}" />
+		<div class="ncap-form-default">
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>项目名称</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="project_name" value="{$info.project_name}" class="input-txt">
+					<span class="err" id="err-project_name"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>所属店铺</label>
+				</dt>
+				<dd class="opt">
+					<select name="shop_id" id="shop">
+						<option value="0">请选择</option>
+						<volist name="shop_list" id="shop">
+							<option <if condition="$info['shop_id'] eq $shop['shop_id']">selected</if>  value="{$shop.shop_id}">{$shop.shop_name}</option>
+						</volist>
+					</select>
+					<span class="err" id="err-shop_id"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>项目售价</label>
+				</dt>
+				<dd class="opt">
+					<input type="text"  name="project_price" value="{$info.project_price}" class="input-txt">
+					<span class="err" id="err-project_price"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>门店售价</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="project_shop_price" value="{$info.project_shop_price}" class="input-txt">
+					<span class="err" id="err-project_shop_price"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label>虚拟销量</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="project_sale_num" value="{$info.project_sale_num}" class="input-txt">
+					<span class="err" id="err-project_sale_num"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="project_img"><em>*</em>项目主图</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+                        <span class="show">
+                            <a id="project_img_a" class="nyroModal" rel="gal" href="{$info.project_img}">
+								<i id="project_img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$info.project_img}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+							</a>
+                        </span>
+           	            <span class="type-file-box">
+                            <input type="text" id="project_img" name="project_img" value="{$info.project_img}" class="type-file-text">
+                            <input type="button" name="button" value="选择上传..." class="type-file-button">
+                            <input class="type-file-file" onClick="GetUploadify(1,'project_img','project','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+                        </span>
+					</div>
+					<span class="err" id="err-project_img"></span>
+				</dd>
+
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>项目相册</label>
+				</dt>
+				<dd class="opt">
+					<div class="ncap-form-default">
+						<table class="table table-bordered">
+							<tbody>
+							<tr>
+								<td>
+									<volist name="info.project_album" id="project_image" item="vo" key="k" >
+										<div style="width:100px; text-align:center; margin: 5px; display:inline-block;" class="goods_xc">
+											<input type="hidden" value="{$project_image}" name="project_album[]">
+											<a href="{$project_image}" target="_blank"><img width="100" height="100" src="{$project_image}"></a>
+											<br>
+											<a href="javascript:void(0)" onClick="image_del(this)">删除</a>
+										</div>
+									</volist>
+
+									<div class="goods_xc" style="width:100px; text-align:center; margin: 5px; display:inline-block;">
+										<a href="javascript:void(0);" onClick="GetUploadify(10,'','project','project_image_call_back');"><img src="/public/images/add-button.jpg" width="100" height="100" /></a>
+										<br/>
+										<a href="javascript:void(0)">&nbsp;&nbsp;</a>
+									</div>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+						<span class="err" id="err-project_images"></span>
+					</div>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label>项目详情</label>
+				</dt>
+				<dd class="opt">
+                    <textarea class="span12 ckeditor" id="project_info" name="project_info" title="">
+                        {$info.project_info}
+                    </textarea>
+					<span class="err"  id="err-project_info"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label>购买须知</label>
+				</dt>
+				<dd class="opt">
+                    <textarea class="span12 ckeditor" id="project_notes" name="project_notes" title="">
+                        {$info.project_notes}
+                    </textarea>
+					<span class="err"  id="err-project_notes"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+			<div class="bot"><a class="ncap-btn-big ncap-btn-green" id="submit">确认提交</a></div>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	//单图上传
+	function img_call_back(fileurl_tmp , elementid)
+	{
+		$("#"+elementid).val(fileurl_tmp);
+		$("#"+elementid+'_a').attr('href', fileurl_tmp);
+		$("#"+elementid+'_i').attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+		var path = new Array;
+		path.push(fileurl_tmp);
+		project_image_call_back(path);
+	}
+	$(function () {
+		$(document).on("click", '#submit', function (e) {
+			$('#submit').attr('disabled',true);
+			verifyForm();
+		})
+	});
+	var url="{:url('Ueditor/index',array('savePath'=>'project'))}";
+	var ue = UE.getEditor('project_info',{
+		serverUrl :url,
+		zIndex: 999,
+		initialFrameWidth: "80%", //初化宽度
+		initialFrameHeight: 300, //初化高度
+		focus: false, //初始化时，是否让编辑器获得焦点true或false
+		maximumWords: 99999, removeFormatAttributes: 'class,style,lang,width,height,align,hspace,valign',//允许的最大字符数 'fullscreen',
+		pasteplain:false, //是否默认为纯文本粘贴。false为不使用纯文本粘贴，true为使用纯文本粘贴
+		autoHeightEnabled: true
+	});var ue1 = UE.getEditor('project_notes',{
+		serverUrl :url,
+		zIndex: 999,
+		initialFrameWidth: "80%", //初化宽度
+		initialFrameHeight: 300, //初化高度
+		focus: false, //初始化时，是否让编辑器获得焦点true或false
+		maximumWords: 99999, removeFormatAttributes: 'class,style,lang,width,height,align,hspace,valign',//允许的最大字符数 'fullscreen',
+		pasteplain:false, //是否默认为纯文本粘贴。false为不使用纯文本粘贴，true为使用纯文本粘贴
+		autoHeightEnabled: true
+	});
+	function verifyForm(){
+		$('span.err').hide();
+		var data = $('#handleForm').serialize();
+		var project_id = $("input[name='project_id']").val();
+		if(!project_id){
+			data += '&act=add';
+		}else{
+			data += '&act=edit';
+		}
+		$.ajax({
+			type: "POST",
+			url: "{:url('postHandle')}",
+			data: data,
+			async:false,
+			dataType: "json",
+			error: function () {
+				layer.alert("服务器繁忙, 请联系管理员!");
+			},
+			success: function (data) {
+				if (data.status == 1) {
+					layer.msg(data.msg,{icon: 1,time: 2000},function(){
+						location.href = "{:U('project/index')}";
+					});
+				} else {
+					$('#submit').attr('disabled',false);
+					$.each(data.result, function (index, item) {
+						var id = index.replace('[]','');
+						$('#err-'+id).text(item).show();
+					});
+					layer.msg(data.msg, {icon: 2,time: 3000});
+				}
+			}
+		});
+	}
+	// 上传商品相册回调函数
+	function project_image_call_back(paths) {
+		var last_div = $(".goods_xc:last").prop("outerHTML");
+		for (var i = 0; i < paths.length; i++) {
+			$(".goods_xc:eq(0)").before(last_div);	// 插入一个 新图片
+			$(".goods_xc:eq(0)").find('a:eq(0)').attr('href', paths[i]).attr('onclick', '').attr('target', "_blank");// 修改他的链接地址
+			$(".goods_xc:eq(0)").find('img').attr('src', paths[i]);// 修改他的图片路径
+			$(".goods_xc:eq(0)").find('a:eq(1)').attr('onclick', "image_del(this,'" + paths[i] + "')").text('删除');
+			var input_obj = $("<input type='hidden' name='project_album[]' value='"+paths[i]+"'/>");
+			$(".goods_xc:eq(0)").find('a:eq(0)').before(input_obj);
+//			$(".goods_xc:eq(0)").find('input').val(paths[i]); // 设置隐藏域 要提交的值
+		}
+	}
+	/**
+	 * 删除组图input
+	 * @access   public
+	 */
+	function image_del(obj)
+	{
+		$(obj).parent().remove();
+	}
+	$(document).ready(function(e) {
+		var project_id = $("input[name='project_id']").val();
+		if (project_id > 0) {
+			$("input[name='projectper_name']").attr('disabled', 'disabled');
+		}
+		$('.z-week').find('.z-week-list').each(function(i,o){
+			var day = $(this).find('input').val();
+			if(day == 1){
+				$(this).addClass('week-list-bg');
+			}else{
+				$(this).removeClass('week-list-bg');
+			}
+		})
+		$(".time-picker").hunterTimePicker();
+		$(".z-week-list").click(function  () {
+			if($(this).hasClass('week-list-bg')){
+				$(this).find("input").val(0);
+				$(this).removeClass('week-list-bg')
+			}else{
+				$(this).find("input").val(1);
+				$(this).addClass('week-list-bg')
+			}
+		})
+	});
+</script>
+</body>
+</html>

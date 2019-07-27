@@ -1,0 +1,424 @@
+<include file="public/layout" />
+<!--<script type="text/javascript" src="//api.map.baidu.com/api?ak=iR2qhnXd5vrFI9wUuIRG9AWGIqykVNok&v=2.0"></script>-->
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4"></script>
+<link href="__PUBLIC__/static/css/timePicker.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__PUBLIC__/static/js/jquery-timepicker.js"></script>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.config.js"/>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.all.min.js"/>
+<script type="text/javascript" charset="utf-8" src="__ROOT__/public/plugins/Ueditor/lang/zh-cn/zh-cn.js"></script>
+<style>
+	.select-business-map {
+		width: 485px;
+		height: 270px;
+	}
+</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+			<div class="subject">
+				<h3>门店管理 - 编辑门店</h3>
+				<h5>网站系统门店管理</h5>
+			</div>
+		</div>
+	</div>
+	<form class="form-horizontal" id="handleForm">
+		<input name="shop_id" type="hidden" value="{$shop['shop_id']}" />
+		<input name="longitude" type="hidden" value="{$shop['longitude']}" />
+		<input name="latitude" type="hidden" value="{$shop['latitude']}" />
+		<div class="ncap-form-default">
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>门店名称</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="shop_name" value="{$shop.shop_name}" class="input-txt">
+					<span class="err" id="err_shop_name"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>联系电话</label>
+				</dt>
+				<dd class="opt">
+					<input type="text"  name="shop_phone" value="{$shop.shop_phone}" class="input-txt">
+					<span class="err" id="err_shop_phone"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>营业时间</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="work_time" value="{$shop.work_time}" class="input-txt">
+					<span class="err" id="err_work_time"></span>
+				</dd>
+			</dl>
+            <dl class="row">
+				<dt class="tit">
+					<label><em>*</em>主营项目</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="shop_project" value="{$shop.shop_project}" class="input-txt">
+					<span class="err" id="err_shop_project"></span>
+				</dd>
+			</dl>
+            <dl class="row">
+				<dt class="tit">
+					<label>店铺福利</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="shop_welfare" value="{$shop.shop_welfare}" class="input-txt">
+					<span class="err" id="err_shop_welfare"></span>
+				</dd>
+			</dl>
+            <dl class="row">
+				<dt class="tit">
+					<label>店铺评分</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" name="shop_star" value="{$shop.shop_star}" class="input-txt">
+					<p class="notic">最大值为5</p>
+					<span class="err" id="err_shop_star"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>门店地址</label>
+				</dt>
+				<dd class="opt">
+					<select name="province_id" id="province" onchange="get_city(this)">
+						<option value="0">请选择</option>
+						<volist name="province_list" id="province">
+							<option <if condition="$shop['province_id'] eq $province['id']">selected</if>  value="{$province.id}">{$province.name}</option>
+						</volist>
+					</select>
+					<select name="city_id" id="city" onchange="get_area(this)">
+						<option  value="0">请选择</option>
+						<volist name="city_list" id="city">
+							<option <if condition="$shop['city_id'] eq $city['id']">selected</if>  value="{$city.id}">{$city.name}</option>
+						</volist>
+					</select>
+					<select name="district_id" id="district">
+						<option  value="0">请选择</option>
+						<volist name="district_list" id="district">
+							<option <if condition="$shop['district_id'] eq $district['id']">selected</if>  value="{$district.id}">{$district.name}</option>
+						</volist>
+					</select>
+					<span class="err" id="err_province_id"></span>
+					<span class="err" id="err_city_id"></span>
+					<span class="err" id="err_district_id"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>详细地址</label>
+				</dt>
+				<dd class="opt">
+					<input type="text" id="shop_address" name="shop_address" value="{$shop.shop_address}" class="input-txt">
+					<!--<a class="ncap-btn" id="search_map"><i class="fa fa-search"></i>搜索地图</a>-->
+					<span class="err" id="err_shop_address"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>地图定位</label>
+				</dt>
+				<dd class="opt">
+					<div class="select-business-wrap p">
+						<div class="select-business-map fl">
+							<div id="container" style="width: 100%;height: 100%;"></div>
+						</div>
+						<script type="text/javascript">
+							function MarkerPoint(lng, lat) {
+								this.lng = lng;
+								this.lat = lat;
+							}
+							var markersArray = [];
+							var longitude = $("input[name='longitude']").val();
+							var latitude = $("input[name='latitude']").val();
+							var shop_id = $("input[name='shop_id']").val();
+							var map = new qq.maps.Map(document.getElementById('container'),{
+								zoom: 12
+							});
+
+							var cityservice = new qq.maps.CityService({
+								complete: function (result) {
+									map.setCenter(result.detail.latLng);
+									if(longitude && latitude){
+										map.setCenter(new qq.maps.LatLng(latitude,longitude));
+										addMarker(new qq.maps.LatLng(latitude,longitude));
+									}
+								}
+							});
+
+							cityservice.searchLocalCity();
+
+							qq.maps.event.addListener(map, "click", function (e) {
+								showInfo(e);
+							});
+
+							//清除标识
+							function clearOverlays() {
+								if (markersArray) {
+									for (i in markersArray) {
+										markersArray[i].setMap(null);
+									}
+									markersArray.length = 0;
+								}
+							}
+							//地图上标注
+							function addMarker(point) {
+								clearOverlays();
+								var marker = new qq.maps.Marker({
+									position: point,
+									map: map
+								});
+								markersArray.push(marker);
+							}
+							//点击地图事件处理
+							function showInfo(e) {
+								$("input[name='longitude']").val(e.latLng.getLng());
+								$("input[name='latitude']").val(e.latLng.getLat());
+								url3 = encodeURI("https://apis.map.qq.com/ws/geocoder/v1/?location=" + e.latLng.getLat() + "," + e.latLng.getLng() + "&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4&output=jsonp&&callback=?");
+								$.getJSON(url3, function (result) {
+									if(result.result!=undefined){
+										document.getElementById("shop_address").value = result.result.address;
+									}else{
+										document.getElementById("shop_address").value = "";
+									}
+
+								})
+								addMarker(e.latLng);
+							}
+							$(function() {
+								$(document).on('click', '#search_map', function() {
+									var province_id = $("#province");
+									var city_id = $("#city");
+									var district_id = $("#district");
+									var shop_address = $("input[name='shop_address']").val();
+									if(province_id.val() == 0){
+										layer.open({icon:2,time:2000,content:"请选择省份"});
+										return;
+									}
+									if(city_id.val() == 0){
+										layer.open({icon:2,time:2000,content:"请选择市"});
+										return;
+									}
+									if(district_id.val() == 0){
+										layer.open({icon:2,time:2000,content:"请选择镇/区"});
+										return;
+									}
+									if(shop_address == ''){
+										layer.open({icon:2,time:2000,content:"请填写详细地址"});
+										return;
+									}
+									var address = province_id.find("option:selected").text() + city_id.find("option:selected").text() + district_id.find("option:selected").text() + shop_address;
+									local.search(address);
+								});
+							})
+						</script>
+					</div>
+					<span class="err" id="err_longitude"></span>
+				</dd>
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label for="shop_img">店铺主图</label>
+				</dt>
+				<dd class="opt">
+					<div class="input-file-show">
+                        <span class="show">
+                            <a id="shop_img_a" class="nyroModal" rel="gal" href="{$shop.shop_img}">
+								<i id="shop_img_i" class="fa fa-picture-o" onmouseover="layer.tips('<img src={$shop.shop_img}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();"></i>
+							</a>
+                        </span>
+           	            <span class="type-file-box">
+                            <input type="text" id="shop_img" name="shop_img" value="{$shop.shop_img}" class="type-file-text">
+                            <input type="button" name="button" value="选择上传..." class="type-file-button">
+                            <input class="type-file-file" onClick="GetUploadify(1,'shop_img','shop','img_call_back')" size="30" hidefocus="true" nc_type="change_site_logo" title="点击前方预览图可查看大图，点击按钮选择文件并提交表单后上传生效">
+                        </span>
+					</div>
+					<span class="err" id="err_shop_img"></span>
+				</dd>
+
+			</dl>
+			<dl class="row">
+				<dt class="tit">
+					<label><em>*</em>门店相册</label>
+				</dt>
+				<dd class="opt">
+					<div class="ncap-form-default">
+						<table class="table table-bordered">
+							<tbody>
+							<tr>
+								<td>
+									<volist name="shop_image_list" id="shop_image" item="vo" key="k" >
+										<div style="width:100px; text-align:center; margin: 5px; display:inline-block;" class="goods_xc">
+											<input type="hidden" value="{$shop_image['image_url']}" name="shop_images[]">
+											<a href="{$shop_image['image_url']}" target="_blank"><img width="100" height="100" src="{$shop_image['image_url']}"></a>
+											<br>
+											<a href="javascript:void(0)" onClick="shop_image_del(this,'{$shop_image.image_url}')">删除</a>
+										</div>
+									</volist>
+
+									<div class="goods_xc" style="width:100px; text-align:center; margin: 5px; display:inline-block;">
+										<a href="javascript:void(0);" onClick="GetUploadify(10,'','shop','shop_image_call_back');"><img src="/public/images/add-button.jpg" width="100" height="100" /></a>
+										<br/>
+										<a href="javascript:void(0)">&nbsp;&nbsp;</a>
+									</div>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+						<span class="err" id="err_shop_images"></span>
+					</div>
+				</dd>
+			</dl>
+
+			<dl class="row">
+				<dt class="tit">
+					<label>店铺简介</label>
+				</dt>
+				<dd class="opt">
+                    <textarea class="span12 ckeditor" id="shop_desc" name="shop_desc" title="">
+                        {$shop.shop_desc}
+                    </textarea>
+					<span class="err"  id="err_shop_desc"></span>
+					<p class="notic"></p>
+				</dd>
+			</dl>
+			<div class="bot"><a class="ncap-btn-big ncap-btn-green" id="submit">确认提交</a></div>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	//单图上传
+	function img_call_back(fileurl_tmp , elementid)
+	{
+		$("#"+elementid).val(fileurl_tmp);
+		$("#"+elementid+'_a').attr('href', fileurl_tmp);
+		$("#"+elementid+'_i').attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+		var path = new Array;
+		path.push(fileurl_tmp);
+		shop_image_call_back(path);
+	}
+	$(function () {
+		$(document).on("click", '#submit', function (e) {
+			$('#submit').attr('disabled',true);
+			verifyForm();
+		})
+	});
+	var url="{:url('Ueditor/index',array('savePath'=>'shop'))}";
+	var ue = UE.getEditor('shop_desc',{
+		serverUrl :url,
+		zIndex: 999,
+		initialFrameWidth: "80%", //初化宽度
+		initialFrameHeight: 300, //初化高度
+		focus: false, //初始化时，是否让编辑器获得焦点true或false
+		maximumWords: 99999, removeFormatAttributes: 'class,style,lang,width,height,align,hspace,valign',//允许的最大字符数 'fullscreen',
+		pasteplain:false, //是否默认为纯文本粘贴。false为不使用纯文本粘贴，true为使用纯文本粘贴
+		autoHeightEnabled: true
+	});
+	function verifyForm(){
+		$('span.err').hide();
+		var shop_id = $("input[name='shop_id']").val();
+		var url = "{:U('Shop/add')}";
+		if(shop_id > 0){
+			url = "{:U('Shop/save')}";
+		}
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: $('#handleForm').serialize(),
+			async:false,
+			dataType: "json",
+			error: function () {
+				layer.alert("服务器繁忙, 请联系管理员!");
+			},
+			success: function (data) {
+				if (data.status == 1) {
+					layer.msg(data.msg,{icon: 1,time: 2000},function(){
+						location.href = "{:U('Shop/index')}";
+					});
+				} else {
+					$('#submit').attr('disabled',false);
+					$('.err').text('');
+					$.each(data.result, function (index, item) {
+						$('span.err').show();
+						var id = index.replace('[]','');
+						$('#err_'+id).text(item);
+					});
+					layer.msg(data.msg, {icon: 2,time: 3000});
+				}
+			}
+		});
+	}
+	// 上传商品相册回调函数
+	function shop_image_call_back(paths) {
+		var last_div = $(".goods_xc:last").prop("outerHTML");
+		for (var i = 0; i < paths.length; i++) {
+			$(".goods_xc:eq(0)").before(last_div);	// 插入一个 新图片
+			$(".goods_xc:eq(0)").find('a:eq(0)').attr('href', paths[i]).attr('onclick', '').attr('target', "_blank");// 修改他的链接地址
+			$(".goods_xc:eq(0)").find('img').attr('src', paths[i]);// 修改他的图片路径
+			$(".goods_xc:eq(0)").find('a:eq(1)').attr('onclick', "shop_image_del(this,'" + paths[i] + "')").text('删除');
+			var input_obj = $("<input type='hidden' name='shop_images[]' value='"+paths[i]+"'/>");
+			$(".goods_xc:eq(0)").find('a:eq(0)').before(input_obj);
+//			$(".goods_xc:eq(0)").find('input').val(paths[i]); // 设置隐藏域 要提交的值
+		}
+	}
+	/**
+	 * 上传之后删除组图input
+	 * @access   public
+	 * @val      string  删除的图片input
+	 */
+	function shop_image_del(obj,path)
+	{
+		$.ajax({
+			type:'GET',
+			url:"{:U('Admin/Uploadify/delupload')}",
+			data:{action:"del", filename:path},
+			success:function(){
+				$(obj).parent().remove(); // 删除完服务器的, 再删除 html上的图片
+			}
+		});
+		// 删除数据库记录
+		$.ajax({
+			type:'GET',
+			url:"{:U('Admin/Shop/shopImageDel')}",
+			data:{filename:path},
+			success:function(){
+				//
+			}
+		});
+	}
+	$(document).ready(function(e) {
+		var shop_id = $("input[name='shop_id']").val();
+		if (shop_id > 0) {
+			$("input[name='shopper_name']").attr('disabled', 'disabled');
+		}
+		$('.z-week').find('.z-week-list').each(function(i,o){
+			var day = $(this).find('input').val();
+			if(day == 1){
+				$(this).addClass('week-list-bg');
+			}else{
+				$(this).removeClass('week-list-bg');
+			}
+		})
+		$(".time-picker").hunterTimePicker();
+		$(".z-week-list").click(function  () {
+			if($(this).hasClass('week-list-bg')){
+				$(this).find("input").val(0);
+				$(this).removeClass('week-list-bg')
+			}else{
+				$(this).find("input").val(1);
+				$(this).addClass('week-list-bg')
+			}
+		})
+	});
+</script>
+</body>
+</html>
