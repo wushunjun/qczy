@@ -95,6 +95,12 @@
   </div>
 </div>
 </body>
+<style>
+    .layim-chat-textarea textarea:hover{border: none !important;}
+    .layim-chat-textarea textarea:focus{border: none !important;}
+    .layim-chat-textarea textarea:active{border: none !important;}
+    .layim-chat-textarea textarea{resize: none !important;}
+</style>
 <link href="__PUBLIC__/static/layui/css/layui.css" rel="stylesheet" type="text/css">
 <script src="__PUBLIC__/static/layui/layui.js"></script>
 <script type="text/javascript"> 
@@ -150,9 +156,9 @@
             },
         });
 
-        var ws = new WebSocket('ws://39.100.72.24:8282');
+        var ws = new WebSocket('wss://qczyapi.siyuan666.com:8282');
         // 服务端主动推送消息时会触发这里的onmessage
-        ws.onmessage = function (e) {
+        ws.onmessage = function (e) {console.log(e);
             // json数据转换成js对象
             var data = eval("(" + e.data + ")");
             var type = data.type || '';
@@ -166,13 +172,22 @@
                 // 当mvc框架调用GatewayClient发消息时直接alert出来
                 case 'msg':
                     layim.getMessage(data.content);
+                    break;
+                case 'online':
+                    layim.addList(data.content);
+                    break;
+                case 'offline':
+                    layim.removeList({
+                        type: 'friend' //或者group
+                        ,id: data.content //好友或者群组ID
+                    });
+                    break;
             }
         };
         layim.on('sendMessage', function(res){
             $.post('{:url("layim/sendMessage")}', {user_id: res.to.id,message:res.mine.content}, function (data) {
             }, 'json');
         })
-
     });
 </script>
 </html>

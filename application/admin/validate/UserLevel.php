@@ -7,7 +7,7 @@ class UserLevel extends Validate
     protected $rule = [
         ['level_name', 'require|unique:user_level'],
         ['amount','require|number|unique:user_level'],
-        ['discount','require|between:1,100|unique:user_level'],
+        ['discount','require|between:1,100'],
     ];
     //错误信息
     protected $message  = [
@@ -18,14 +18,14 @@ class UserLevel extends Validate
         'amount.unique'         => '已存在相同消费额度',
         'discount.require'      => '折扣率必填',
         'discount.between'      => '折扣率在1-100之间',
-        'discount.unique'       => '已存在相同折扣率',
+        //'discount.unique'       => '已存在相同折扣率',
     ];
     //验证场景
     protected $scene = [
         'edit'  =>  [
             'level_name'    =>'require|unique:user_level,level_name^level_id',
             'amount'        =>'require|number|unique:user_level,amount^level_id',
-            'discount'    =>'require|between:1,100|unique:user_level,discount^level_id',
+            'discount'    =>'require|between:1,100',
         ],
     ];
 }

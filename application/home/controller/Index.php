@@ -20,8 +20,7 @@ use think\Image;
 use think\Db;
 class Index extends Base {
     
-    public function index(){      
-
+    public function index(){
         // 如果是手机跳转到 手机模块
         if(isMobile()){
             header("Location:".U('Mobile/Index/index'));

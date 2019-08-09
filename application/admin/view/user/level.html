@@ -48,6 +48,16 @@
             </dl>-->
             <dl class="row">
                 <dt class="tit">
+                    动态条数
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="count" value="{$info.count}" id="count" class="input-txt" onkeyup="this.value=/^\d+\.?\d{0,2}$/.test(this.value) ? this.value : ''">
+                    <span class="err" id="err_count"></span>
+                    <p class="notic">限制该等级会员每日发布动态条数，0或不填表示不限制</p>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
                     等级描述
                 </dt>
                 <dd class="opt">

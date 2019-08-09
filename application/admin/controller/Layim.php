@@ -54,6 +54,9 @@ class Layim extends Base
         $client_id = input('client_id');
         Gateway::bindUid($client_id, $user_id);
         Gateway::setSession($client_id, array('user_id'=>$user_id));
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1', 6379);
+        $redis->set($client_id,$user_id);
     }
     public function sendMessage(){
         $user_id = input('user_id');
@@ -66,7 +69,7 @@ class Layim extends Base
             'content' =>  $message,
             'mine' =>  false,
             'fromid' =>  -1,
-            'timestamp' =>  time() * 1000,
+            'timestamp' =>  date('Y-m-d H:i'),
         ];
         Gateway::sendToUid($user_id, json_encode(['type'=>'msg','content'=>$data]));
     }

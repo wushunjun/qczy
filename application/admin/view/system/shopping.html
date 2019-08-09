@@ -1,4 +1,7 @@
 <include file="public/layout" />
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.config.js"/>
+<load href="__ROOT__/public/plugins/Ueditor/ueditor.all.min.js"/>
+<script type="text/javascript" charset="utf-8" src="__ROOT__/public/plugins/Ueditor/lang/zh-cn/zh-cn.js"></script>
 <body style="background-color: #FFF; overflow: auto;">
 <div id="append_parent"></div>
 <div id="ajaxwaitid"></div>
@@ -108,7 +111,7 @@
                 </dd>
             </dl>-->
 
-            <dl class="row">
+            <!--<dl class="row">
                 <dt class="tit">购买积分商品,是否必须使用积分</dt>
                 <dd class="opt">
                     <div class="onoff">
@@ -118,6 +121,16 @@
                         <input id="integral_use_enable0" name="integral_use_enable" value="0" type="radio">
                     </div>
                     <p class="notic">用户购买积分商品,结算方式是否必须使用积分,是为必须按照商品规定的积分兑换支付积分，否为可以不适用积分而使用金额购买商品</p>
+                </dd>
+            </dl>-->
+            <dl class="row">
+                <dt class="tit">
+                    <label>会员等级权益说明</label>
+                </dt>
+                <dd class="opt">
+                    <textarea class="span12 ckeditor" id="level_explain" name="level_explain" title="">{$config[level_explain]}</textarea>
+                    <span class="err"  id="err-level_explain"></span>
+                    <p class="notic"></p>
                 </dd>
             </dl>
             <!--<dl class="row">
@@ -139,4 +152,17 @@
 </div>
 <div id="goTop"> <a href="JavaScript:void(0);" id="btntop"><i class="fa fa-angle-up"></i></a><a href="JavaScript:void(0);" id="btnbottom"><i class="fa fa-angle-down"></i></a></div>
 </body>
+<script>
+    var url="{:url('Ueditor/index',array('savePath'=>'level_explain'))}";
+    var ue = UE.getEditor('level_explain',{
+        serverUrl :url,
+        zIndex: 999,
+        initialFrameWidth: "80%", //初化宽度
+        initialFrameHeight: 300, //初化高度
+        focus: false, //初始化时，是否让编辑器获得焦点true或false
+        maximumWords: 99999, removeFormatAttributes: 'class,style,lang,width,height,align,hspace,valign',//允许的最大字符数 'fullscreen',
+        pasteplain:false, //是否默认为纯文本粘贴。false为不使用纯文本粘贴，true为使用纯文本粘贴
+        autoHeightEnabled: true
+    });
+</script>
 </html>

@@ -127,12 +127,12 @@ return array(
 
     'distribution' => array('name' => '分销', 'child' => array(
         array('name' => '分销管理', 'child' => array(
-            array('name' => '分销商品', 'act' => 'goods_list', 'op' => 'Distribut'),
-            array('name' => '分销商列表', 'act' => 'distributor_list', 'op' => 'Distribut'),
-            array('name' => '分销关系', 'act' => 'tree', 'op' => 'Distribut'),
-            array('name' => '分销商等级', 'act' => 'grade_list', 'op' => 'Distribut'),
+//            array('name' => '分销商品', 'act' => 'goods_list', 'op' => 'Distribut'),
+//            array('name' => '分销商列表', 'act' => 'distributor_list', 'op' => 'Distribut'),
+//            array('name' => '分销关系', 'act' => 'tree', 'op' => 'Distribut'),
+//            array('name' => '分销商等级', 'act' => 'grade_list', 'op' => 'Distribut'),
             array('name' => '分销设置', 'act' => 'distribut', 'op' => 'System'),
-            array('name' => '分成日志', 'act' => 'rebate_log', 'op' => 'Distribut'),
+//            array('name' => '分成日志', 'act' => 'rebate_log', 'op' => 'Distribut'),
         )),
 
         array('name' => '微信接入', 'child' => array(
@@ -149,6 +149,9 @@ return array(
         array('name' => '会员管理', 'child' => array(
             array('name' => '会员列表', 'act' => 'index', 'op' => 'User'),
             array('name' => '会员等级', 'act' => 'levelList', 'op' => 'User'),
+        )),
+        array('name' => '动态管理', 'child' => array(
+            array('name' => '动态列表', 'act' => 'index', 'op' => 'Dynamic'),
         )),
         array('name' => '充值提现', 'child' => array(
             array('name' => '充值记录', 'act' => 'recharge', 'op' => 'User'),

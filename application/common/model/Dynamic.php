@@ -15,5 +15,8 @@ use think\Model;
 
 class Dynamic extends Model
 {
-
+    public function user()
+    {
+        return $this->hasOne('Users', 'user_id', 'user_id');
+    }
 }

@@ -27,7 +27,7 @@ class User extends Apibase
         ]);
         if ($validate !== true)
             $this->paramError($validate);
-        $result = model('users')->find($param['user_id']);
+        $result = model('users')->with('userLevel')->find($param['user_id']);
         if($result){
             $this->apiReturn('1001','成功',$result);
         }else{
@@ -290,5 +290,12 @@ class User extends Apibase
             build_qr_code($url,'spread'.$param['user_id']);
         }
         $this->apiReturn('1001','成功',$image);
+    }
+    /**
+     * 会员等级说明
+     */
+    public function level_explain(){
+        $explain = tpCache('shopping.level_explain');
+        $this->apiReturn('1001','成功',htmlspecialchars_decode($explain));
     }
 }

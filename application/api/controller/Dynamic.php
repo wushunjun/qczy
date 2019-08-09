@@ -36,6 +36,16 @@ class Dynamic extends Apibase
         $validate = $this->validate($param,$rule);
         if($validate !== true)
             $this->paramError($validate);
+        $user = model('users')->with('userLevel')->find($param['user_id']);
+        if($user['userLevel']['count'] > 0){
+            $start_time = strtotime(date('y-m-d'));
+            $end_time = $start_time + 3600 * 24 - 1;
+            $count = $this->model->where(['dynamic_add_time'=>['between',"$start_time,$end_time"],'user_id'=>$param['user_id']])->count();
+            if($count >= $user['userLevel']['count']){
+                $msg = '抱歉，' . $user['userLevel']['level_name'] . '会员每日发布动态上线为' . $user['userLevel']['count'] . '条';
+                $this->apiReturn('1002',$msg,'');
+            }
+        }
         $param['dynamic_add_time'] = time();
         $param['dynamic_images'] = implode(',',$param['dynamic_images']);
         $result = $this->model->allowField(true)->save($param);

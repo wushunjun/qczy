@@ -64,7 +64,24 @@ class Shop extends Apibase {
      * 区县列表
      */
     public function area_list(){
-        $list = model('region')->where(['level'=>3,'parent_id'=>31930])->select();
+        $param = request()->param();
+        $validate = $this->validate($param, [
+            'user_lat' => 'number|require',
+            'user_lng' => 'number|require',
+        ]);
+        if ($validate !== true)
+            $this->paramError($validate);
+        $location = $param['user_lat'] . ',' . $param['user_lng'];
+        $address = json_decode(file_get_contents("https://apis.map.qq.com/ws/geocoder/v1/?location=$location&key=75BBZ-T35KX-QYC4V-7OYAI-ZXEUQ-PIFP4"),true);
+        $city_name = $address['result']['ad_info']['city'];
+        $city = model('region')->where(['name'=>$city_name])->find();
+        if($city['level'] == 1){
+            $city = model('region')->where(['parent_id'=>$city['id'],'name'=>'市辖区'])->find();
+        }
+        if(!$city){//默认重庆
+            $city['id'] = 31930;
+        }
+        $list = model('region')->where(['level'=>3,'parent_id'=>$city['id']])->select();
         $this->apiReturn('1001','成功',$list);
     }
     /**
