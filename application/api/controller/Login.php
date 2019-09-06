@@ -18,6 +18,7 @@ class Login extends Apibase
     public $weixin_config;
     /**
      * 微信登录
+     * 思路：由前端
      */
     function wechat_login(){
         $this->weixin_config = M('wx_user')->find(); //取微获信配置
@@ -54,17 +55,21 @@ class Login extends Apibase
                $res = model('users')->where(['openid'=>$data['openid']])->update(['user_token'=>$token,'expire_time'=>$expire_time]);
             }
             $redirect_url = urldecode(I('redirect_url'));//重定向地址解码
-            $redirect_url = $redirect_url ? $redirect_url : '#/home/index';//默认进入首页
-            //Header("Location: http://".$_SERVER['HTTP_HOST']."/#/home/index?user_id=".$user['user_id']."&user_token=".$token);
-            Header("Location: " . $redirect_url . "?user_id=".$user['user_id']."&user_token=".$token);
+            //$redirect_url = $redirect_url ? $redirect_url : '#/home/index';//默认进入首页
+            $mark = stripos($redirect_url,'shareid') ? '&' : '?';
+            if(stripos($redirect_url,'my/recom')){//如果是来自分享页面，跳到首页
+                Header("Location: https://qczy.siyuan666.com/#/home/index?user_id=".$user['user_id']."&user_token=".$token);
+            }else{
+                Header("Location: " . $redirect_url . $mark . "user_id=".$user['user_id']."&user_token=".$token);
+            }
             exit();
-        }else{
+        }/*else{
             $redirect_url = I('redirect_url');//重定向地址
             $redirect_url = $redirect_url ? $redirect_url : '#/home/index';//默认进入首页
             $baseUrl = urlencode($this->get_url() . '?redirect_url=' . urlencode($redirect_url) . '&share_id=' . $first_leader);
             $url = $this->__CreateOauthUrlForCode($baseUrl); // 获取 code地址
             $this->apiReturn('1001', '成功', $url);
-        }
+        }*/
     }
     // 网页授权登录获取 OpendId
     public function GetOpenid()

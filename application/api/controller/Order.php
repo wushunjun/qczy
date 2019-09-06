@@ -87,6 +87,7 @@ class Order extends Apibase
             }else{
                 $order['order_goods'][$k]['comment_btn'] = 0;
             }
+            $order['order_goods'][$k]['goods_img'] = goods_thum_images($v['goods_id'],200,200);
         }
         unset($order['order_button']['comment_btn']);
         $order['pay_money'] = $order['total_amount'] - $order['user_money'] - $order['integral_money'];

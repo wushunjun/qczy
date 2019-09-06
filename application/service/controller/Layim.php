@@ -55,6 +55,7 @@ class Layim extends Controller
     public function sendMessage(){
         $user_id = input('user_id');
         $message = input('message');
+        $to_user_id = input('to_user_id/d',-1);
         $user = Db::name('users')->find($user_id);
         $data = [
             'username' =>  $user['nickname'],
@@ -66,7 +67,29 @@ class Layim extends Controller
             'fromid' =>  $user['user_id'],
             'timestamp' =>  time() * 1000,
         ];
-        Gateway::sendToUid('-1', json_encode(['type'=>'msg','content'=>$data]));
+        $log_data = json_encode(['id'=>$user_id, 'name'=>$user['nickname'], 'message'=>$message, 'time'=>time() * 1000]);
+        $key = $user_id < $to_user_id ? $user_id . '-' . $to_user_id : $to_user_id . '-' . $user_id;
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1', 6379);
+        $redis->lPush($key,$log_data);//保存聊天记录
+        Gateway::sendToUid($to_user_id, json_encode(['type'=>'msg','content'=>$data]));
         exit(json_encode(['status'=>1001,'message'=>'发送成功','data'=>'']));
+    }
+
+    /**
+     * 获取历史聊天记录
+     */
+    public function getHistory(){
+        $user_id = input('user_id');
+        $to_user_id = input('to_user_id/d',-1);
+        $key = $user_id < $to_user_id ? $user_id . '-' . $to_user_id : $to_user_id . '-' . $user_id;
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1', 6379);
+        $list = $redis->lRange($key,0,100);//保存聊天记录
+        $list = array_reverse($list);
+        foreach($list as $k=>$v){
+            $list[$k] = json_decode($v);
+        }
+        exit(json_encode(['status'=>1001,'message'=>'发送成功','data'=>$list]));
     }
 }

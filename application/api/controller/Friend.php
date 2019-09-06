@@ -67,6 +67,8 @@ class Friend extends Apibase {
         Db::name('user_visit')->where(['user_id'=>$param['user_id'],'to_user_id'=>$param['page_user_id']])->delete();
         Db::name('user_visit')->insert(['user_id'=>$param['user_id'],'to_user_id'=>$param['page_user_id'],'uv_add_time'=>time()]);
         if($result){
+            $res = Db::name('follow')->where(['user_id'=>$param['user_id'],'to_user_id'=>$param['page_user_id']])->find();
+            $result['is_friend'] = $res ? 1 : 0;
             $this->apiReturn('1001','成功',$result);
         }else{
             $this->apiReturn('1002','失败','');

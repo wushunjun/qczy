@@ -28,6 +28,7 @@ class User extends Apibase
         if ($validate !== true)
             $this->paramError($validate);
         $result = model('users')->with('userLevel')->find($param['user_id']);
+        unset($result['paypwd']);
         if($result){
             $this->apiReturn('1001','成功',$result);
         }else{
@@ -81,6 +82,9 @@ class User extends Apibase
         ]);
         if ($validate !== true)
             $this->paramError($validate);
+        if($param['paypwd']){
+            $param['paypwd'] = encrypt($param['paypwd']);
+        }
         $result = model('users')->where(['user_id'=>$param['user_id']])->update($param);
         if($result){
             $user = model('users')->where(['user_id'=>$param['user_id']])->find();
@@ -284,12 +288,57 @@ class User extends Apibase
         ]);
         if ($validate !== true)
             $this->paramError($validate);
-        $url = 'http://beautiful.tanwenchao.com/#/home/index?share_id='.$param['user_id'];
+        $url = 'https://qczy.siyuan666.com/#/home/index?share_id='.$param['user_id'];
+        $image1 = './public/QR_code/spread.png';//海报底图路径
         $image = '/public/QR_code/spread'.$param['user_id'].'.png';
         if(!file_exists('.'.$image)){
-            build_qr_code($url,'spread'.$param['user_id']);
+            $image2 = build_qr_code($url,'spread'.$param['user_id']);
+            thumb($image2,185,185);
+            composite_images($image1,$image2,'spread'.$param['user_id']);
         }
         $this->apiReturn('1001','成功',$image);
+    }
+    /**
+     * 会员卡一维码
+     * @param user_id 用户id
+     */
+    public function card_bar_code()
+    {
+        $param = request()->param();
+        $validate = $this->validate($param, [
+            'user_id' => 'integer|require',
+        ]);
+        if ($validate !== true)
+            $this->paramError($validate);
+        $user = Db::name('users')->where('user_id',$param['user_id'])->find();
+        if(!$user['card_num']){
+            $card_num = get_card_number();
+            Db::name('users')->where('user_id',$param['user_id'])->update(['card_num'=>$card_num]);
+        }else{
+            $card_num = $user['card_num'];
+        }
+        BARcode($card_num);//生成一维码
+    }
+    /**
+     * 会员卡二维码
+     * @param user_id 用户id
+     */
+    public function card_qr_code()
+    {
+        $param = request()->param();
+        $validate = $this->validate($param, [
+            'user_id' => 'integer|require',
+        ]);
+        if ($validate !== true)
+            $this->paramError($validate);
+        $user = Db::name('users')->where('user_id',$param['user_id'])->find();
+        if(!$user['card_num']){
+            $card_num = get_card_number();
+            Db::name('users')->where('user_id',$param['user_id'])->update(['card_num'=>$card_num]);
+        }else{
+            $card_num = $user['card_num'];
+        }
+        build_qr_code($card_num);//生成二维码
     }
     /**
      * 会员等级说明
@@ -297,5 +346,23 @@ class User extends Apibase
     public function level_explain(){
         $explain = tpCache('shopping.level_explain');
         $this->apiReturn('1001','成功',htmlspecialchars_decode($explain));
+    }
+    /**
+     * 获取聊天对象的头像和昵称
+     * @param int to_user_id 聊天对象id
+     */
+    public function get_icon_nickname(){
+        $param = request()->param();
+        $validate = $this->validate($param, [
+            'to_user_id' => 'integer|require',
+        ]);
+        if ($validate !== true)
+            $this->paramError($validate);
+        $result = Db::name('users')->where(['user_id'=>$param['to_user_id']])->field('head_pic,nickname,user_id')->find();
+        if($result){
+            $this->apiReturn('1001','成功',$result);
+        }else{
+            $this->apiReturn('1002','失败','');
+        }
     }
 }

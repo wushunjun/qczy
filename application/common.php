@@ -851,10 +851,20 @@ function update_pay_status($order_sn,$ext=array())
         $attach = explode('|',$ext['attach']);
         if(isset($attach[2]) && $attach[2]){//已经有订单的情况
             $res1 = Db::name('project_order')->where(['po_id' => $attach[2]])->update(['po_status'=>1]);
+            $po_id = $attach[2];
         }else{
             $res2 = model('project_order')->addOrder($attach[0],1,$attach[1]);
+            $po_id = $res2['data']['po_id'];
         }
         if($res1 || $res2['status'] == 1001){
+            $project_order = model('project_order')->find($po_id);
+            $pay_log_data = [
+                'user_id' => $project_order['user_id'],
+                'log_money' => -$project_order['po_price'],
+                'log_add_time' => time(),
+                'log_info' => '购买' . $project_order['po_buy_num'] . '个【' . $project_order['project_name'] . '】',
+            ];
+            model('pay_log')->insertGetId($pay_log_data);
             $user = model('users')->where(['user_id'=>$attach[0]])->find();
             rebate($user,$ext['total_fee']);//处理分销
         }
@@ -882,6 +892,13 @@ function update_pay_status($order_sn,$ext=array())
             $update = array('pay_status'=>1,'pay_time'=>$time);
             if(isset($ext['transaction_id'])) $update['transaction_id'] = $ext['transaction_id'];
             M('order')->where("order_sn", $order_sn)->save($update);
+            $pay_log_data = [
+                'user_id' => $order['user_id'],
+                'log_money' => -$order['total_amount'],
+                'log_add_time' => time(),
+                'log_info' => '购买美容产品，订单号【'.$order['order_sn'].'】',
+            ];
+            model('pay_log')->insertGetId($pay_log_data);
         }
 
         // 减少对应商品的库存.注：拼团类型为抽奖团的，先不减库存
@@ -1747,15 +1764,35 @@ function rebate($user,$order_money){
         accountLog($user['second_leader'], $second_money, 0, '下下级会员【'.$user['nickname'].'】下单，获取分销返利',$second_money,0 ,'');
     }
 }
+
+/**
+ * 获取卡号
+ * @return string
+ */
+function get_card_number(){
+    $card_num = null;
+    // 保证不会有重复卡号存在
+    while(true){
+        $card_num = 6888 . substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8) . rand(1000,9999); // 卡号
+        $card_num_count = M('users')->where("card_num = ".$card_num)->count();
+        if($card_num_count == 0)
+            break;
+    }
+    return $card_num;
+}
 /**
  *生成二维码
  */
-function build_qr_code($data,$name){
+function build_qr_code($data, $name = ''){
     vendor('phpqrcode.phpqrcode');
     $value = $data; //二维码内容
     $errorCorrectionLevel = 'H';//容错级别
     $matrixPointSize = 10;//生成图片大小
-    $url = $_SERVER['DOCUMENT_ROOT'].'/public/QR_code/'.$name.'.png';
+    if($name){
+        $url = $_SERVER['DOCUMENT_ROOT'].'/public/QR_code/'.$name.'.png';
+    }else{
+        $url = false;
+    }
     //生成二维码图片
     QRcode::png($value, $url, $errorCorrectionLevel, $matrixPointSize, 2);
     //$logo = $_SERVER['DOCUMENT_ROOT'].'/Public/Img/logo.png';//准备好的logo图片
@@ -1778,5 +1815,97 @@ function build_qr_code($data,$name){
     }*/
     //输出图片
     //imagepng($QR, $url);
-    return $url;
+    if($name){
+        return $url;
+    }
+}
+/*条形码生成*/
+function BARcode($text){
+    vendor('barcode.class.BCGFontFile');
+    require_once('./vendor/barcode/class/BCGColor.php');
+    vendor('barcode.class.BCGDrawing');
+    vendor('barcode.class.BCGcode128#barcode');
+
+    // Loading Font
+    $font = new BCGFontFile('./vendor/barcode/font/Arial.ttf', 18);
+
+    // Don't forget to sanitize user inputs
+    $text = isset($text) ? $text : 'HELLO';
+
+    // The arguments are R, G, B for color.
+    $color_black = new BCGColor(0, 0, 0);
+    $color_white = new BCGColor(255, 255, 255);
+
+    $drawException = null;
+    try {
+        $code = new BCGcode128();
+        $code->setScale(2); // Resolution
+        $code->setThickness(30); // Thickness
+        $code->setForegroundColor($color_black); // Color of bars
+        $code->setBackgroundColor($color_white); // Color of spaces
+        $code->setFont($font); // Font (or 0)
+        $code->parse($text); // Text
+    } catch(Exception $exception) {
+        $drawException = $exception;
+    }
+
+    /* Here is the list of the arguments
+    1 - Filename (empty : display on screen)
+    2 - Background color */
+    $drawing = new BCGDrawing('', $color_white);
+    if($drawException) {
+        $drawing->drawException($drawException);
+    } else {
+        $drawing->setBarcode($code);
+        $drawing->draw();
+    }
+    // Header that says it is an image (remove it if you save the barcode to a file)
+    header('Content-Type: image/png');
+    header('Content-Disposition: inline; filename="barcode.png"');
+
+    // Draw (or save) the image into PNG format.
+    $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
+}
+
+function composite_images($image1,$image2,$name){//图片合成
+    // 图片一
+    $path_1 = $image1;
+    // 图片二
+    $path_2 = $image2;
+    // 创建图片对象
+    $image_1 = imagecreatefrompng($path_1);
+    $image_2 = imagecreatefrompng($path_2);
+    // 合成图片
+    imagecopymerge($image_1, $image_2, 188, 631, 0, 0, 185, 185, 90);
+    $black = imagecolorallocate($image_1, 0, 0, 0);
+    //imagestring($image_1, 3, 30, 30, "shuiyn", $black);
+    // 输出合成图片
+    imagepng($image_1, $_SERVER['DOCUMENT_ROOT'].'/public/QR_code/'.$name.'.png');
+    //echo "<style type='text/css'>body{margin:0px; padding:0px;}</style><img width='100%' height='100%' src='/Public/QR_code/".$name.".png'>";
+    // die;
+}
+//用于对图片进行缩放
+function thumb($filename,$width=420,$height=420){
+    //获取原图像$filename的宽度$width_orig和高度$height_orig
+    list($width_orig,$height_orig) = getimagesize($filename);
+    //根据参数$width和$height值，换算出等比例缩放的高度和宽度
+    if ($width && ($width_orig<$height_orig)){
+        $width = ($height/$height_orig)*$width_orig;
+    }else{
+        $height = ($width / $width_orig)*$height_orig;
+    }
+
+    //将原图缩放到这个新创建的图片资源中
+    $image_p = imagecreatetruecolor($width, $height);
+    //获取原图的图像资源
+    $image = imagecreatefrompng($filename);
+
+    //使用imagecopyresampled()函数进行缩放设置
+    imagecopyresampled($image_p,$image,0,0,0,0,$width,$height,$width_orig,$height_orig);
+
+    //将缩放后的图片$image_p保存，100(质量最佳，文件最大)
+    imagepng($image_p,$filename);
+
+    imagedestroy($image_p);
+    imagedestroy($image);
 }

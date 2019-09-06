@@ -158,7 +158,8 @@
 
         var ws = new WebSocket('wss://qczyapi.siyuan666.com:8282');
         // 服务端主动推送消息时会触发这里的onmessage
-        ws.onmessage = function (e) {console.log(e);
+        ws.onmessage = function (e) {
+            console.log(layim.cache());
             // json数据转换成js对象
             var data = eval("(" + e.data + ")");
             var type = data.type || '';
@@ -174,6 +175,11 @@
                     layim.getMessage(data.content);
                     break;
                 case 'online':
+                    //先删除
+                    layim.removeList({
+                        type: 'friend' //或者group
+                        ,id: data.content.id //好友或者群组ID
+                    });
                     layim.addList(data.content);
                     break;
                 case 'offline':

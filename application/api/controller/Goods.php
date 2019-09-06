@@ -26,6 +26,9 @@ class Goods extends Apibase {
         if($param['id']){
             $where['cat_id'] = $param['id'];
         }
+        if($param['keywords']){
+            $where['goods_name'] = ['like',"%$param[keywords]%"];
+        }
         $list = M('goods')->where($where)->order('goods_id desc')->page(page($param))->select();
         $this->apiReturn('1001','成功',$list);
     }

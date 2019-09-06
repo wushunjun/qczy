@@ -36,7 +36,7 @@ class Layim extends Base
             'id' => '-1',
             'status' => 'online',
             'sign' => '为客户服务',
-            'avatar' => 'https://we7.zhongyuncheng.com//addons/qidong_app_plugin_wx/images/logo/k5.png',
+            'avatar' => 'https://qczyapi.siyuan666.com/public/images/im_logo.jpg',
         ];
         $data['friend'][0] = [
             'groupname' => '一群上帝',
@@ -62,8 +62,8 @@ class Layim extends Base
         $user_id = input('user_id');
         $message = input('message');
         $data = [
-            'username' =>  '客服1号',
-            'avatar' =>  'https://we7.zhongyuncheng.com//addons/qidong_app_plugin_wx/images/logo/k5.png',
+            'username' =>  '客服小姐姐',
+            'avatar' =>  'https://qczyapi.siyuan666.com/public/images/im_logo.jpg',
             'id' =>  '-1',
             'type' =>  'friend',
             'content' =>  $message,
@@ -71,6 +71,11 @@ class Layim extends Base
             'fromid' =>  -1,
             'timestamp' =>  date('Y-m-d H:i'),
         ];
+        $log_data = json_encode(['id'=>-1, 'name'=>'客服小姐姐', 'message'=>$message, 'time'=>time() * 1000]);
+        $key = '-1-' . $user_id;
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1', 6379);
+        $redis->lPush($key,$log_data);//保存聊天记录
         Gateway::sendToUid($user_id, json_encode(['type'=>'msg','content'=>$data]));
     }
 }

@@ -17,12 +17,14 @@ class Luck extends Apibase {
      * 流程：今日运势每日可抽一次，进入今日运势前先调此接口确认用户是否已抽,
      * 如果返回的data有数据则直接显示到运势详情，否则用户选择类型系统随机给出运势结果
      * @param int user_id 用户id
+     * @param int lt_id 运势类型id
      */
     public function has_luck()
     {
         $param = request()->param();
         $validate = $this->validate($param, [
             'user_id' => 'integer|require',
+            'lt_id' => 'integer|require',
         ]);
         if ($validate !== true)
             $this->paramError($validate);
@@ -30,7 +32,7 @@ class Luck extends Apibase {
         $end_time = $start_time + 3600 * 24 -1;
         $res = Db::name('luck_log')->alias('a')
             ->join('luck b','a.luck_id = b.luck_id')
-            ->where(['a.user_id'=>$param['user_id'],'a.ll_add_time'=>['between',"$start_time,$end_time"]])
+            ->where(['a.user_id'=>$param['user_id'],'a.lt_id'=>$param['lt_id'],'a.ll_add_time'=>['between',"$start_time,$end_time"]])
             ->find();
         if($res){
             $comment_list = Db::name('luck_comment')->where(['luck_id'=>$res['luck_id']])->select();
@@ -57,24 +59,27 @@ class Luck extends Apibase {
         $end_time = $start_time + 3600 * 24 -1;
         $result = Db::name('luck_log')->alias('a')
             ->join('luck b','a.luck_id = b.luck_id')
-            ->where(['a.user_id'=>$param['user_id'],'a.ll_add_time'=>['between',"$start_time,$end_time"]])
+            ->where(['a.user_id'=>$param['user_id'],'a.lt_id'=>$param['lt_id'],'a.ll_add_time'=>['between',"$start_time,$end_time"]])
             ->find();
-        if($result){
-            $this->apiReturn('1002','非法操作','');
+        if($result){//如果抽过
+            //$this->apiReturn('1002','非法操作','');
+            $data = Db::name('luck')->where(['luck_id'=>$result['luck_id']])->find();
+        }else{
+            $list = Db::name('luck')->where(['lt_id'=>$param['lt_id']])->column('luck_id,luck_img,luck_name,lt_id');
+            if(!$list){
+                $this->apiReturn('1002','数据错误，请联系客服','');
+            }
+            $id_arr = array_keys($list);
+            $i = mt_rand(0, count($id_arr)-1);
+            $data = $list[$id_arr[$i]];
         }
-        $list = Db::name('luck')->where(['lt_id'=>$param['lt_id']])->column('luck_id,luck_img,luck_name');
-        if(!$list){
-            $this->apiReturn('1002','数据错误，请联系客服','');
-        }
-        $id_arr = array_keys($list);
-        $i = mt_rand(0, count($id_arr)-1);
-        $data = $list[$id_arr[$i]];
         $comment_list = Db::name('luck_comment')->where(['luck_id'=>$id_arr[$i]])->select();
         $data['comment_list'] = $comment_list;
         $log_data = [
             'user_id' => $param['user_id'],
             'luck_id' => $data['luck_id'],
             'll_add_time' => time(),
+            'lt_id' => $data['lt_id'],
         ];
         $res = Db::name('luck_log')->insertGetId($log_data);
         if(!$res){

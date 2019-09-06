@@ -26,10 +26,11 @@ class Apibase extends Controller
             'Login' => '*',
             'Index' => '*',
             'Reward' => '*',
+            'User' => ['card_bar_code','card_qr_code'],
         ];
         //排除不需要token验证的接口$exclude[$controller_name] != $action_name
         if(!isset($exclude[$controller_name]) || ($exclude[$controller_name] != '*' && !in_array($action_name, $exclude[$controller_name]))){
-            //$this->check_token();//进行token验证
+            $this->check_token();//进行token验证
         }
 
     }
@@ -77,7 +78,7 @@ class Apibase extends Controller
             $this->paramError($validate);
         $model = model('users');
         if (!$this->user)
-            $this->apiReturn(1002, '用户不存在', '');
+            $this->apiReturn(1006, '用户不存在', '');
         if ($this->user['user_token'] != $param['user_token'] || $this->user['expire_time'] < time()) {//验证token是否正确，以及是否过期
             $this->apiReturn(1006, 'token验证未通过', '');
         }

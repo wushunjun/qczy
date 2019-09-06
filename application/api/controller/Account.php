@@ -24,9 +24,9 @@ class Account extends Apibase {
         if ($validate !== true)
             $this->paramError($validate);
         if($param['type'] == 0){
-            $where = "pay_points !=0 and user_id=" . $param['user_id'];
-        }elseif($param['type'] == 1){
             $where = "user_money !=0 and user_id=" . $param['user_id'];
+        }elseif($param['type'] == 1){
+            $where = "pay_points !=0 and user_id=" . $param['user_id'];
         }elseif($param['type'] == 2){
             $where = "user_money > 0 and user_id=" . $param['user_id'];
         }

@@ -38,6 +38,11 @@ function array_allow_keys($array, $keys)
     return $newArr;
 }
 
+/**
+ * 加密
+ * @param $str
+ * @return string
+ */
 function encrypt($str){
 	return md5(C("AUTH_CODE").$str);
 }
